@@ -1,0 +1,322 @@
+### Base URL
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### Authentication Endpoints
+
+### Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "customer"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Extract token from login response
+@authToken = {{login.response.body.access_token}}
+
+### User Endpoints
+
+### Get current user profile
+GET {{baseUrl}}/user/profile
+Authorization: Bearer {{authToken}}
+
+### Update user profile
+PUT {{baseUrl}}/user/profile
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "firstName": "John Updated",
+  "lastName": "Doe Updated",
+  "phone": "+1234567890"
+}
+
+### Car Endpoints
+
+### Get all cars (public endpoint)
+GET {{baseUrl}}/car
+
+### Get car by ID
+GET {{baseUrl}}/car/1
+
+### Create a new car (admin only)
+POST {{baseUrl}}/car
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "make": "Toyota",
+  "model": "Camry",
+  "year": 2023,
+  "licensePlate": "ABC123",
+  "dailyRate": 45.99,
+  "status": "available",
+  "type": "sedan",
+  "fuelType": "gasoline",
+  "seats": 5,
+  "color": "white",
+  "mileage": 15000
+}
+
+### Update car
+PUT {{baseUrl}}/car/1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "dailyRate": 49.99,
+  "status": "maintenance"
+}
+
+### Delete car
+DELETE {{baseUrl}}/car/1
+Authorization: Bearer {{authToken}}
+
+### Customer Endpoints
+
+### Get customer profile
+GET {{baseUrl}}/customer/profile
+Authorization: Bearer {{authToken}}
+
+### Update customer profile
+PUT {{baseUrl}}/customer/profile
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "driversLicense": "DL123456789",
+  "dateOfBirth": "1990-01-15",
+  "address": "123 Main St, City, State 12345"
+}
+
+### Get all customers (admin only)
+GET {{baseUrl}}/customer
+Authorization: Bearer {{authToken}}
+
+### Location Endpoints
+
+### Get all locations
+GET {{baseUrl}}/location
+
+### Create location (admin only)
+POST {{baseUrl}}/location
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Downtown Branch",
+  "address": "456 Downtown Ave, City, State 12345",
+  "phone": "+1987654321",
+  "hours": "Mon-Fri 8:00-18:00, Sat 9:00-17:00"
+}
+
+### Update location
+PUT {{baseUrl}}/location/1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "hours": "Mon-Fri 8:00-20:00, Sat 9:00-18:00"
+}
+
+### Reservation Endpoints
+
+### Create a reservation
+POST {{baseUrl}}/reservation
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "carId": 1,
+  "pickupLocationId": 1,
+  "returnLocationId": 1,
+  "startDate": "2024-02-01",
+  "endDate": "2024-02-05",
+  "totalAmount": 183.96
+}
+
+### Get user's reservations
+GET {{baseUrl}}/reservation/my-reservations
+Authorization: Bearer {{authToken}}
+
+### Get reservation by ID
+GET {{baseUrl}}/reservation/1
+Authorization: Bearer {{authToken}}
+
+### Cancel reservation
+PUT {{baseUrl}}/reservation/1/cancel
+Authorization: Bearer {{authToken}}
+
+### Rental Endpoints
+
+### Create rental from reservation
+POST {{baseUrl}}/rental
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "reservationId": 1,
+  "actualPickupDate": "2024-02-01T10:00:00Z",
+  "pickupLocationId": 1
+}
+
+### Get user's rentals
+GET {{baseUrl}}/rental/my-rentals
+Authorization: Bearer {{authToken}}
+
+### Return rental
+PUT {{baseUrl}}/rental/1/return
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "actualReturnDate": "2024-02-05T14:30:00Z",
+  "returnLocationId": 1,
+  "finalMileage": 15200,
+  "fuelLevel": 85
+}
+
+### Payment Endpoints
+
+### Process payment for reservation
+POST {{baseUrl}}/payment/process
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "reservationId": 1,
+  "paymentMethod": "credit_card",
+  "cardNumber": "4111111111111111",
+  "expiryDate": "12/25",
+  "cvv": "123",
+  "amount": 183.96
+}
+
+### Get payment history
+GET {{baseUrl}}/payment/history
+Authorization: Bearer {{authToken}}
+
+### Get payment by ID
+GET {{baseUrl}}/payment/1
+Authorization: Bearer {{authToken}}
+
+### Insurance Endpoints
+
+### Get available insurance options
+GET {{baseUrl}}/insurance
+
+### Add insurance to reservation
+POST {{baseUrl}}/insurance/reservation/1
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "insuranceTypeId": 1,
+  "coverageAmount": 500.00,
+  "premium": 25.00
+}
+
+### Maintenance Endpoints
+
+### Get maintenance records (admin/manager only)
+GET {{baseUrl}}/maintenance
+Authorization: Bearer {{authToken}}
+
+### Create maintenance record
+POST {{baseUrl}}/maintenance
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "carId": 1,
+  "maintenanceType": "routine_service",
+  "description": "Oil change and tire rotation",
+  "scheduledDate": "2024-03-01",
+  "estimatedCost": 89.99
+}
+
+### Update maintenance status
+PUT {{baseUrl}}/maintenance/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "completed",
+  "actualCost": 85.50,
+  "completedDate": "2024-02-28"
+}
+
+### Test Authorization and Validation
+
+### Test unauthorized access
+GET {{baseUrl}}/customer
+# No authorization header - should return 401
+
+### Test invalid data
+POST {{baseUrl}}/car
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "make": "",
+  "model": "",
+  "year": 1800,
+  "dailyRate": -10
+}
+# Should return validation errors
+
+### Test role-based access
+POST {{baseUrl}}/car
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "make": "BMW",
+  "model": "X5",
+  "year": 2024,
+  "licensePlate": "XYZ789",
+  "dailyRate": 89.99
+}
+# Should fail if user doesn't have admin role
+
+### Test date validation
+POST {{baseUrl}}/reservation
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "carId": 1,
+  "startDate": "2023-01-01",
+  "endDate": "2023-01-01"
+}
+# Should fail if end date is before start date
+
+### Test availability check
+POST {{baseUrl}}/reservation
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+  "carId": 1,
+  "startDate": "2024-02-01",
+  "endDate": "2024-02-05"
+}
+# Should fail if car is not available for selected dates
+
+### Health Check
+GET {{baseUrl}}/health
