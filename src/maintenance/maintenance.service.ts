@@ -15,6 +15,8 @@ import {
 } from './entities/maintenance.entity';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
+import { UpdateMaintenanceStatusDto } from './dto/update-maintenance-status.dto';
+import { CompleteMaintenanceDto } from './dto/complete-maintenance.dto';
 import { LoggerService } from './../logger/services/logger.service';
 
 @Injectable()
@@ -181,26 +183,19 @@ export class MaintenanceService {
         );
       }
 
-      await this.maintenanceRepository.update(
-        maintenance_id,
+      // Simple merge and save - handles type conversion automatically
+      const updatedMaintenance = this.maintenanceRepository.merge(
+        existingMaintenance,
         updateMaintenanceDto,
       );
 
-      const updatedMaintenance = await this.maintenanceRepository.findOne({
-        where: { maintenance_id },
-        relations: ['car'],
-      });
-
-      if (!updatedMaintenance) {
-        throw new NotFoundException(
-          `Maintenance with id ${maintenance_id} not found after update`,
-        );
-      }
+      const savedMaintenance =
+        await this.maintenanceRepository.save(updatedMaintenance);
 
       this.logger.log(
-        `Maintenance updated successfully - ID: ${updatedMaintenance.maintenance_id}, Status: ${updatedMaintenance.status}`,
+        `Maintenance updated successfully - ID: ${savedMaintenance.maintenance_id}, Status: ${savedMaintenance.status}`,
       );
-      return updatedMaintenance;
+      return savedMaintenance;
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -250,7 +245,7 @@ export class MaintenanceService {
 
   async updateStatus(
     maintenance_id: number,
-    status: MaintenanceStatus,
+    updateStatusDto: UpdateMaintenanceStatusDto,
   ): Promise<Maintenance> {
     try {
       const maintenance = await this.findOne(maintenance_id);
@@ -264,11 +259,13 @@ export class MaintenanceService {
         );
       }
 
-      await this.maintenanceRepository.update(maintenance_id, { status });
+      await this.maintenanceRepository.update(maintenance_id, {
+        status: updateStatusDto.status,
+      });
 
       const updatedMaintenance = await this.findOne(maintenance_id);
       this.logger.log(
-        `Maintenance ${maintenance_id} status updated to ${status}`,
+        `Maintenance ${maintenance_id} status updated to ${updateStatusDto.status}`,
       );
       return updatedMaintenance;
     } catch (error) {
@@ -291,8 +288,7 @@ export class MaintenanceService {
 
   async completeMaintenance(
     maintenance_id: number,
-    actual_cost?: number,
-    notes?: string,
+    completeMaintenanceDto: CompleteMaintenanceDto,
   ): Promise<Maintenance> {
     try {
       const maintenance = await this.findOne(maintenance_id);
@@ -304,19 +300,23 @@ export class MaintenanceService {
         );
       }
 
-      const updateData: any = {
+      const updateData: Partial<Maintenance> = {
         status: MaintenanceStatus.COMPLETED,
         completed_date: new Date(),
       };
 
-      if (actual_cost) updateData.cost = actual_cost;
-      if (notes) updateData.notes = notes;
+      if (completeMaintenanceDto.actual_cost !== undefined) {
+        updateData.cost = completeMaintenanceDto.actual_cost;
+      }
+      if (completeMaintenanceDto.notes !== undefined) {
+        updateData.notes = completeMaintenanceDto.notes;
+      }
 
       await this.maintenanceRepository.update(maintenance_id, updateData);
 
       const updatedMaintenance = await this.findOne(maintenance_id);
       this.logger.log(
-        `Maintenance ${maintenance_id} completed successfully - Cost: ${actual_cost || updatedMaintenance.cost}`,
+        `Maintenance ${maintenance_id} completed successfully - Cost: ${completeMaintenanceDto.actual_cost || updatedMaintenance.cost}`,
       );
       return updatedMaintenance;
     } catch (error) {

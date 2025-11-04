@@ -9,7 +9,10 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MaintenanceType } from '../entities/maintenance.entity';
+import {
+  MaintenanceType,
+  MaintenanceStatus,
+} from '../entities/maintenance.entity';
 
 export class CreateMaintenanceDto {
   @IsNumber()
@@ -37,6 +40,6 @@ export class CreateMaintenanceDto {
   notes?: string;
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(MaintenanceStatus)
+  status?: MaintenanceStatus;
 }

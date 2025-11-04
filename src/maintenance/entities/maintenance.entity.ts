@@ -63,7 +63,6 @@ export class Maintenance {
   @CreateDateColumn({ type: 'datetime2', default: () => 'GETDATE()' })
   created_at: Date;
 
-  //  UpdateDateColumn for automatic timestamp updates
   @UpdateDateColumn({ type: 'datetime2', default: () => 'GETDATE()' })
   updated_at: Date;
 
