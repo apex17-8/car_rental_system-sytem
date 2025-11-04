@@ -24,7 +24,7 @@ export class RefreshToken {
   @Column({ type: 'datetime2' })
   expires_at: Date;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'bit', default: 0 }) // Changed from boolean to bit
   is_revoked: boolean;
 
   @Column({ type: 'datetime2', nullable: true })
